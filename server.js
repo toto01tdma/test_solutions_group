@@ -54,13 +54,15 @@ app.get('/homepage', async (req, res) => {
         let sort = "&sort=asc";
         let sortColumn = "&sortColumn=id";
 
+        let res_search = search ? encodeURIComponent(search) : "";
+
         let response = await axios.get(`https://api-test-front-end.237solutions.tech/api/news${pageSize}${page}${searchQuery}${sort}${sortColumn}`, {
             headers: {
                 'accept': '*/*',
                 'Authorization': `Bearer ${req.session.user.auth.accessToken}`
             }
         });
-        res.render('homepage', { news: response.data.data.data, search });
+        res.render('homepage', { news: response.data.data.data });
     } catch (error) {
         res.status(500).send(error.response.data);
     }
