@@ -60,7 +60,7 @@ app.get('/homepage', async (req, res) => {
                 'Authorization': `Bearer ${req.session.user.auth.accessToken}`
             }
         });
-        res.render('homepage', { news: response.data.data.data });
+        res.render('homepage', { news: response.data.data.data, search });
     } catch (error) {
         res.status(500).send(error.response.data);
     }
