@@ -47,21 +47,25 @@ app.get('/homepage', async (req, res) => {
     }
 
     try {
-        let { search } = req.query;
+        let { search, sort } = req.query;
         let pageSize = "?pageSize=20";
         let page = "&page=1";
         let searchQuery = search ? `&search=${encodeURIComponent(search)}` : "";
-        let sort = "&sort=asc";
+        let sortOrder = sort || 'asc';
+        let sortQuery = `&sort=${sortOrder}`;
         let sortColumn = "&sortColumn=id";
 
-        let res_search = search ? encodeURIComponent(search) : "";
-
-        let response = await axios.get(`https://api-test-front-end.237solutions.tech/api/news${pageSize}${page}${searchQuery}${sort}${sortColumn}`, {
+        let response = await axios.get(`https://api-test-front-end.237solutions.tech/api/news${pageSize}${page}${searchQuery}${sortQuery}${sortColumn}`, {
             headers: {
                 'accept': '*/*',
                 'Authorization': `Bearer ${req.session.user.auth.accessToken}`
             }
         });
+
+        if (req.headers['content-type'] === 'application/json') {
+            return res.json({ news: response.data.data.data });
+        }
+
         res.render('homepage', { news: response.data.data.data });
     } catch (error) {
         res.status(500).send(error.response.data);

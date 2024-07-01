@@ -7,7 +7,6 @@
     <title>Homepage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/public/style_all.css">
 
     <style>
         body {
@@ -22,7 +21,8 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #3A2D28; border-bottom: 1px solid #535353;">
+    <nav class="navbar navbar-expand-lg navbar-light"
+        style="background-color: #3A2D28; border-bottom: 1px solid #535353;">
         <div class="container-fluid">
             <a class="navbar-brand text-white" href="#">News Portal</a>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -45,27 +45,42 @@
                 <h3 class="text-center mb-4">News List</h3>
                 <div class="row mb-3">
                     <div class="col-12">
-                        <form method="GET" action="/homepage">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="search" name="search" placeholder="Search...">
-                                <button class="btn text-white" style="background-color: #3A2D28;" type="submit">Search <i class="fa fa-search"></i></button>
+                        <form id="searchForm">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="search" name="search"
+                                    placeholder="Search...">
+                                <button class="btn text-white" style="background-color: #3A2D28;" type="submit">Search
+                                    <i class="fa fa-search"></i></button>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label class="input-group-text" for="sort">Sort By</label>
+                                <select class="form-select" id="sort" name="sort">
+                                    <option value="asc">Ascending</option>
+                                    <option value="desc">Descending</option>
+                                </select>
                             </div>
                         </form>
                     </div>
                 </div>
-                <div class="row">
-                    <% news.forEach(n => { %>
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
-                            <img src="<%= n.image %>" class="card-img-top" style="height: 320px;" alt="<%= n.title %>">
-                            <div class="card-body">
-                                <h5 class="card-title"><%= n.title %></h5>
-                                <p class="card-text"><%= n.abstract %></p>
-                                <button onclick="window.location.href='/news/<%= n.id %>'" style="background-color: #A48374;" class="btn text-white">Details</button>
+                <div class="row" id="newsList">
+                    <% news.forEach(n=> { %>
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="<%= n.image %>" class="card-img-top" style="height: 320px;"
+                                    alt="<%= n.title %>">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= n.title %>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= n.abstract %>
+                                    </p>
+                                    <button onclick="window.location.href='/news/<%= n.id %>'"
+                                        style="background-color: #A48374;" class="btn text-white">Details</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <% }) %>
+                        <% }) %>
                 </div>
                 <div class="mt-3">
                     <h5>Current Time:</h5>
@@ -92,6 +107,36 @@
         ws.onerror = (error) => {
             console.error(`WebSocket error: ${error.message}`);
         };
+
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const search = document.getElementById('search').value;
+            const sort = document.getElementById('sort').value;
+            const response = await fetch(`/homepage?search=${encodeURIComponent(search)}&sort=${sort}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            const newsList = document.getElementById('newsList');
+            newsList.innerHTML = '';
+            result.news.forEach(n => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'col-md-4 mb-4';
+                newsItem.innerHTML = `
+            <div class="card">
+                <img src="${n.image}" class="card-img-top" style="height: 320px;" alt="${n.title}">
+                <div class="card-body">
+                    <h5 class="card-title">${n.title}</h5>
+                    <p class="card-text">${n.abstract}</p>
+                    <button onclick="window.location.href='/news/${n.id}'" style="background-color: #A48374;" class="btn text-white">Details</button>
+                </div>
+            </div>
+        `;
+                newsList.appendChild(newsItem);
+            });
+        });
     </script>
 </body>
 
